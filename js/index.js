@@ -332,6 +332,19 @@
 
                 // add the values as select options making sure that the current value is selected
                 var selectedVal = dc.value;
+                // also check if there's any old values that are longer than in the current list and adjust to that width
+                if (!isNewRow) {
+                    var selectedValLen = (selectedVal.length / 2) + 2.5;
+                    if (colW < selectedValLen) {
+                        colW = selectedValLen;
+                        colWArr[j] = colW;
+                    }
+                }
+
+                // update any existing rows to the width
+                $("[id^='sel_'][id$='_" + j.toString() + "']").css("width", (colW + 1) + "em");
+
+
                 $("[id='" + tdId + "']").append("<select id='sel_" + tdId + "' style='width:" + (colW + 1) + "em' class='form-select form-select-sm'></select>");
                 // if it's a new row then need to add a blank value to the select that will be removed after the user has selected a value
                 if (isNewRow) {
