@@ -328,6 +328,8 @@
                     colWArr[j] = colW;
                 }
 
+                var foundExistingVal = false;
+
                 // add the values as select options making sure that the current value is selected
                 var selectedVal = dc.value;
                 $("[id='" + tdId + "']").append("<select id='sel_" + tdId + "' style='width:" + (colW + 1) + "em' class='form-select form-select-sm'></select>");
@@ -337,16 +339,22 @@
                     $("[id='sel_" + tdId + "']").on("change", function() {
                         $("[id='blkopt_" + tdId + "']").remove();
                     });
+                    foundExistingVal = true;
                 }
+                
                 colSelArr.sort().forEach(function(lv) {
                     if (lv == selectedVal) {
                         $("[id='sel_" + tdId + "']").append("<option value='" + lv + "' selected>" + lv + "</option>");
+                        foundExistingVal = true;
                     } else {
                         $("[id='sel_" + tdId + "']").append("<option value='" + lv + "'>" + lv + "</option>");
                     }
-
-                    
                 });
+
+                // if it's not a new row and it has an existing value that is no longer there in the lookups, then add it as a special value to this one select list
+                if (!foundExistingVal) {
+                    $("[id='sel_" + tdId + "']").append("<option value='" + selectedVal + "' selected>" + selectedVal + "</option>");
+                }
             } else
             // datatype = string
             if (colDataType == "string") {
