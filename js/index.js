@@ -518,9 +518,6 @@
                     celValue = $(this).children().val();
                 }
 
-                // escape single quotes in celValue
-                celValue = celValue.replaceAll("'","\'");
-
                 if (cellIndex == userNameIndex) {
                     if (userName == "") {
                         userName = celValue;
