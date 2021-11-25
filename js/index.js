@@ -357,16 +357,16 @@
                 
                 colSelArr.sort().forEach(function(lv) {
                     if (lv == selectedVal) {
-                        $("[id='sel_" + tdId + "']").append("<option value='" + lv + "' selected>" + lv + "</option>");
+                        $("[id='sel_" + tdId + "']").append("<option value='" + lv.replace(/'/g, "&#39;") + "' selected>" + lv + "</option>");
                         foundExistingVal = true;
                     } else {
-                        $("[id='sel_" + tdId + "']").append("<option value='" + lv + "'>" + lv + "</option>");
+                        $("[id='sel_" + tdId + "']").append("<option value='" + lv.replace(/'/g, "&#39;") + "'>" + lv + "</option>");
                     }
                 });
 
                 // if it's not a new row and it has an existing value that is no longer there in the lookups, then add it as a special value to this one select list
                 if (!foundExistingVal) {
-                    $("[id='sel_" + tdId + "']").append("<option value='" + selectedVal + "' selected>" + selectedVal + "</option>");
+                    $("[id='sel_" + tdId + "']").append("<option value='" + selectedVal.replace(/'/g, "&#39;") + "' selected>" + selectedVal + "</option>");
                 }
             } else
             // datatype = string
