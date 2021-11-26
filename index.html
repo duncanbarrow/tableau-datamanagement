@@ -29,14 +29,16 @@
             </div>
         </div>
         <br/>
-        <div class="d-grid gap-2 d-md-flex justify-content-end">
-            <button id="btn_newRow" type="button" class="btn btn-outline-primary me-md-3">New Row</button>
-            <button id="btn_submit" type="button" class="btn btn-outline-primary me-md-3">Submit Data</button>
-            <button id="btn_reset" type="button" class="btn btn-outline-danger me-md-3">Reset</button>
+        <div class="container">
+            <div class="row g-1 p-2 justify-content-end">
+                <div class="col-auto"><button id="btn_newRow" type="button" class="btn btn-outline-primary me-md-3">New Row</button>    </div>
+                <div class="col-auto"><button id="btn_submit" type="button" class="btn btn-outline-primary me-md-3">Submit Data</button></div>
+                <div class="col-auto"><button id="btn_reset" type="button" class="btn btn-outline-danger me-md-3">Reset</button></div>
+            </div>
         </div>
         <br/>
         <div class='table-responsive'>
-            <table style="width:30em" class="table table-condensed table-striped table-sm align-middle" id="dataTable">
+            <table style="width:10em" class="table table-condensed table-striped table-sm align-middle" id="dataTable">
                 <!--<tr>
                     <th>Name</th>
                     <th>Value</th>

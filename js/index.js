@@ -273,7 +273,7 @@
         // if adding a new row then dr = [] so need to fill it will blank data for each column
         if (isNewRow) {
             mainCols.forEach(function(c) {
-                dr.push("");
+                dr.push({value:""});
             });
         }
 
@@ -296,6 +296,8 @@
             if (colW < valLen) {
                 colW = valLen;
                 colWArr[j] = colW;
+                // update previous widths
+                $("[id^='td_'][id$='_" + j.toString() + "']").children("input").css("width",colW + "em");
             }
 
             var colDataType = mainCols[j].dataType;
