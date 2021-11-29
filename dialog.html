@@ -25,6 +25,9 @@
                     <li class="nav-item" role="presentation">
                         <button class="nav-link" id="columns-tab" data-bs-toggle="tab" data-bs-target="#columns" type="button" role="tab" aria-controls="columns" aria-selected="false">Columns</button>
                     </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="other-tab" data-bs-toggle="tab" data-bs-target="#other" type="button" role="tab" aria-controls="other" aria-selected="false">Other</button>
+                    </li>
                 </ul>
                 <div class="tab-content" id="settingTabsContent">
                     <div class="tab-pane fade show active" id="main" role="tabpanel" aria-labelledby="main-tab">
@@ -93,12 +96,53 @@
                                         <th>Column Name</th>
                                         <th style='text-align: center;'>Read Only</th>
                                         <th style='text-align: center;'>NOT NULL</th>
+                                        <th style='text-align: center;'>Exclude Column</th>
                                         <th style='text-align: center;'>Is Lookup</th>
                                         <th>Lookup Name</th>
                                     </tr>
                                 </thead>
                                 <tbody id="settingTableColRows">
                                     
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="tab-pane fade" id="other" role="tabpanel" aria-labelledby="other-tab">
+                        <div class="table-responsive">
+                            <table id="settingTableOther" class="table table-striped align-middle">
+                                <thhead>
+                                    <tr>
+                                        <th>Setting Name</th>
+                                        <th>Setting Value</th>
+                                    </tr>
+                                </thhead>
+                                <tbody>
+                                    <tr>
+                                        <td>Table Alignment</td>
+                                        <td>
+                                            <select id="tableAlign" class="form-select">
+                                                <option selected value="left">Left</option>
+                                                <option value="center">Center</option>
+                                                <option value="right">Right</option>
+                                            </select>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Child Trigger Parameter</td>
+                                        <td>
+                                            <select id="childParam" class="form-select">
+                                                <option selected value=""></option>
+                                            </select>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Parent Trigger Parameter</td>
+                                        <td>
+                                            <select id="parentParam" class="form-select">
+                                                <option selected value=""></option>
+                                            </select>
+                                        </td>
+                                    </tr>
                                 </tbody>
                             </table>
                         </div>

@@ -1,5 +1,7 @@
 'use strict';
 
+//const { param } = require("jquery");
+
 // settings names:
 // mainWorksheet
 // lookupWorksheet
@@ -24,6 +26,9 @@
         var gScriptUrl = tableau.extensions.settings.get("gScriptUrl");
         var newRows = tableau.extensions.settings.get("newRows");
         var delRows = tableau.extensions.settings.get("delRows");
+        var childParam = tableau.extensions.settings.get("childParam");
+        var parentParam = tableau.extensions.settings.get("parentParam");
+        var tableAlign = tableau.extensions.settings.get("tableAlign");
 
         // get main dashboard item
         let dashboard = tableau.extensions.dashboardContent.dashboard;
@@ -98,6 +103,29 @@
             $("#enableDelRow").prop("checked",true);
         }
 
+        // if the table alignement has been set then select the relevant value
+        if (tableAlign != undefined) {
+            $("#tableAlign").val(tableAlign);
+        }
+
+        // get dashboard parameters
+        dashboard.getParametersAsync().then(function (params) {
+            // if there are parameters, populate the child and parent parmeter select lists
+            // also, if either have been defined previously then set that value
+            if (params != undefined && params.length > 0) {
+                params.forEach(function (p) {
+                    $("#childParam").append("<option value='" + p.name + "'>" + p.name + "</option>");
+                    $("#parentParam").append("<option value='" + p.name + "'>" + p.name + "</option>");
+                });
+                if (childParam != undefined && childParam != "") {
+                    $("#childParam").val(childParam);
+                }
+                if (parentParam != undefined && parentParam != "") {
+                    $("#parentParam").val(parentParam);
+                }
+            }
+        });
+
         
 
         // set button functions
@@ -170,9 +198,10 @@
     function lookupListUpdate(lookupWorksheet,mainWorksheet,usernameColumn,isChange) {
         // try to get previously defined list of lookups, a 2-dimensional array ||columnName|LkpListName||
         var lookupCols = tableau.extensions.settings.get("lookupCols");
-        // try to get previously defined list of read only and not null columns
+        // try to get previously defined list of read only and not null columns and exclude columns
         var readOnlyCols = tableau.extensions.settings.get("readOnlyCols");
         var notNullCols = tableau.extensions.settings.get("notNullCols");
+        var excludeCols = tableau.extensions.settings.get("excludeCols");
 
         // get dashboard and worksheet
         var dashboard = tableau.extensions.dashboardContent.dashboard;
@@ -219,6 +248,7 @@
                         $("[id='tr_col_" + current_value.fieldName + "']").append("<td>" + current_value.fieldName + "</td>");
                         $("[id='tr_col_" + current_value.fieldName + "']").append("<td style='text-align: center;'><input type='checkbox' id='ro_" + current_value.fieldName + "' class='form-check-input'></td>");
                         $("[id='tr_col_" + current_value.fieldName + "']").append("<td style='text-align: center;'><input type='checkbox' id='nn_" + current_value.fieldName + "' class='form-check-input'></td>");
+                        $("[id='tr_col_" + current_value.fieldName + "']").append("<td style='text-align: center;'><input type='checkbox' id='ex_" + current_value.fieldName + "' class='form-check-input'></td>");
                         $("[id='tr_col_" + current_value.fieldName + "']").append("<td style='text-align: center;'><input type='checkbox' id='chk_" + current_value.fieldName + "' class='form-check-input'></td>");
                         $("[id='tr_col_" + current_value.fieldName + "']").append("<td><select id='sel_" + current_value.fieldName + "' class='form-select' disabled></td>");
                         // loop over each lookup list and add as an option
@@ -258,6 +288,17 @@
                     notNullColArray.forEach(function (nn) {
                         $("[id='nn_" + nn + "']").prop("checked",true);
                     });
+                }
+
+                // try setting exclude cols if they have been defined
+                if (excludeCols != undefined && !isChange) {
+                    // split into array
+                    var excludeColArray = excludeCols.split("|");
+
+                    // loop over each column and mark as checked
+                    excludeColArray.forEach(function (ex) {
+                        $("[id='ex_" + ex + "']").prop("checked",true);
+                    })
                 }
     
     
@@ -300,6 +341,15 @@
         tableau.extensions.settings.set("usernameCol", $("#usernameColumn").val());
         tableau.extensions.settings.set("uniqueCols", $("#uniqueColumn").val().join("|"));
         tableau.extensions.settings.set("gScriptUrl", $("#gScriptEndpoint").val());
+        tableau.extensions.settings.set("childParam", $("#childParam").val());
+        tableau.extensions.settings.set("parentParam", $("#parentParam").val());
+        tableau.extensions.settings.set("tableAlign", $("#tableAlign").val());
+        if ($("#childParam").val() != "") {
+            tableau.extensions.settings.set("childParam", $("#childParam").val());
+        }
+        if ($("#parentParam").val() != "") {
+            tableau.extensions.settings.set("parentParam", $("#parentParam").val());
+        }
 
         if ($("#enableNewRow").is(":checked")){
             tableau.extensions.settings.set("newRows","True");
@@ -328,6 +378,14 @@
             nnCols.push(nnCol);
         });
         tableau.extensions.settings.set("notNullCols", nnCols.join("|"));
+
+        // Exclude cols
+        var exCols = [];
+        $("[id^=ex_").filter(":checked").each(function() {
+            var exCol = $(this).attr("id").substr(3);
+            exCols.push(exCol);
+        })
+        tableau.extensions.settings.set("excludeCols", exCols.join("|"));
 
 
         // lookup Cols

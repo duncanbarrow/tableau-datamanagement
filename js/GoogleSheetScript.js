@@ -221,21 +221,24 @@ function mergeRows(data, uniqueColumns) {
       var rowPKArr = [];
       uniqueColumns.forEach(function(pk) {
         var pkIdx = colMap[pk];
-        rowPKArr.push(row[pkIdx]);
+        rowPKArr.push(row[pkIdx].toUpperCase());
       });
       var rowPK = rowPKArr.join("|");
 
       rowVals[rowPK] = i;
     });
 
+    var dataPKs = [];
     // loop over each row of data
     data.forEach(function(dataRow) {
       // get the PK of that row as a string concat with |
       var pkArr = [];
       uniqueColumns.forEach(function(pk) {
-        pkArr.push(dataRow[pk]);
+        pkArr.push(dataRow[pk].toUpperCase());
       });
       var dataRowPK = pkArr.join("|");
+
+      dataPKs.push(dataRowPK);
 
       // try to find the index of this PK in the rowVals
       var dataRowIdx = rowVals[dataRowPK];
@@ -269,6 +272,23 @@ function mergeRows(data, uniqueColumns) {
       }
 
     });
+
+    // lastly check for any rows that still exist but weren't pushed in the data
+    // these should be deleted as it is probably from when a PK changed
+    // so the old one doesn't exist anymore
+    var delIdxs = [];
+    for (const [key,value] of Object.entries(rowVals)) {
+      if (!dataPKs.includes(key)) {
+        delIdxs.push(value);
+      }
+    }
+    if (delIdxs.length > 0) {
+      // sort the row indexes descending so as to delete from the bottom up
+      delIdxs.sort(function(a, b){return b-a}).forEach(function(rowIdx) {
+        // rows start at 1, the indexes are 0 based, but we already removed a row for the headers so make sure to + 2
+        mainSheet.deleteRow(rowIdx + 2);
+      });
+    }
 
     return "success";
   }
