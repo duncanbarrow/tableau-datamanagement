@@ -369,6 +369,13 @@
 
                 var colDataType = mainCols[j].dataType;
 
+                var cellValue = dc.value;
+
+                // if the cell value is null then replace with empty string
+                if (cellValue == "%null%") {
+                    cellValue = "";
+                }
+
                 // first check if it's a lookup column
                 if (lkpColIdxArr.includes(j)) {
                     var colName = mainCols[j].fieldName;
@@ -400,7 +407,7 @@
                     var foundExistingVal = false;
 
                     // add the values as select options making sure that the current value is selected
-                    var selectedVal = dc.value;
+                    var selectedVal = cellValue;
                     // also check if there's any old values that are longer than in the current list and adjust to that width
                     if (!isNewRow) {
                         var selectedValLen = (selectedVal.length / 2) + 2.5;
@@ -416,7 +423,7 @@
 
                     $("[id='" + tdId + "']").append("<select id='sel_" + tdId + "' style='width:" + (colW + 1) + "em' class='form-select form-select-sm'></select>");
                     // if it's a new row then need to add a blank value to the select that will be removed after the user has selected a value
-                    if (isNewRow) {
+                    if (isNewRow || cellValue == "") {
                         $("[id='sel_" + tdId + "']").append("<option id='blkopt_" + tdId + "' value='' selected></option>");
                         $("[id='sel_" + tdId + "']").on("change", function() {
                             $("[id='blkopt_" + tdId + "']").remove();
@@ -434,7 +441,7 @@
                     });
 
                     // if it's not a new row and it has an existing value that is no longer there in the lookups, then add it as a special value to this one select list
-                    if (!foundExistingVal) {
+                    if (!foundExistingVal && cellValue != "") {
                         $("[id='sel_" + tdId + "']").append("<option value='" + selectedVal.replace(/'/g, "&#39;") + "' selected>" + selectedVal + "</option>");
                     }
                 } else
