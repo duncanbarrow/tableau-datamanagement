@@ -194,28 +194,69 @@
             // get lookup data first
             lkpWS.getSummaryDataAsync().then(function (lkpdata) {
 
-                
+                // find the indexes of the necessary columns "Lookup Name" and "Lookup Value"
                 var lkpNameIdx = lkpdata.columns.find(column => column.fieldName === "Lookup Name").index;
                 var lkpValueIdx = lkpdata.columns.find(column => column.fieldName === "Lookup Value").index;
 
+                // see if there are parent-child relationships in the lookups
+                var lkpParentNameCol = lkpdata.columns.find(column => column.fieldName === "Parent Lookup Name");
+                var lkpParentValueCol = lkpdata.columns.find(column => column.fieldName === "Parent Lookup Value");
+                var lkpParentNameIdx = -1;
+                var lkpParentValueIdx = -1;
+                if (lkpParentNameCol != undefined && lkpParentValueCol != undefined) {
+                    lkpParentNameIdx = lkpParentNameCol.index;
+                    lkpParentValueIdx = lkpParentValueCol.index;
+                }
+
+                // populate the array lkpArr with lookup lists
+                // if there is no parent lookup the structure will be [LookupName,[Lookup Value 1,...,Lookup Value n]]
+                // if there is a parent lookup, the structure will be [LookupName,[Lookup Value 1,...,Lookup Value n],Parent Lookup Name,[Parent Lkp Val1,...,Parent Lkp Valn]]
+                // start with some temporary variables
                 var currentLkpName = "";
                 var currentLkpValues = [];
+                var currentParentLkpName = "";
+                var currentParentLkpValues = [];
 
+                // loop over each row of the lookup data set
                 lkpdata.data.forEach(function (lkpRow) {
+                    // get the name of the lookup list (Lookup Name)
                     var tmplkpName = lkpRow[lkpNameIdx].value;
+                    // check to see if this is the same as the previous row (which will be stored in the currentLkpName)
                     if (currentLkpName != tmplkpName) {
+                        // then check that the sub-array of lookup values has some items (will be empty on the first row)
                         if (currentLkpValues.length > 0) {
-                            lkpArr.push([currentLkpName,currentLkpValues]);
+                            // lastly check to see if the parent lookup and value have been defined
+                            if (currentParentLkpName != "" && currentLkpValues.length > 0) {
+                                // if they have then push the structure for the lookup with parent
+                                lkpArr.push([currentLkpName,currentLkpValues,currentParentLkpName,currentParentLkpValues]);
+                            } else {
+                                // else push the structure for the lookup without parent
+                                lkpArr.push([currentLkpName,currentLkpValues]);
+                            }
                         }
+                        // reset the variables after each change of lookup name
                         currentLkpName = tmplkpName;
                         currentLkpValues = [];
+                        
+                        currentParentLkpName = "";
+                        currentParentLkpValues = [];
                     }
+                    // for every row push the lookup values into the temp lookup value array
                     currentLkpValues.push(lkpRow[lkpValueIdx].value);
-
+                    // check to see if the parent lookup has been defined and populate the variables if it has
+                    if (lkpParentNameIdx > -1 && lkpParentValueIdx > -1) {
+                        currentParentLkpName = lkpRow[lkpParentNameIdx].value;
+                        currentParentLkpValues.push(lkpRow[lkpParentValueIdx].value);
+                    }
                 });
 
                 // need to push the last array
-                lkpArr.push([currentLkpName,currentLkpValues]);
+                if (currentParentLkpName != "" && currentParentLkpValues.length > 0) {
+                    lkpArr.push([currentLkpName,currentLkpValues,currentParentLkpName,currentParentLkpValues]);
+                } else {
+                    lkpArr.push([currentLkpName,currentLkpValues]);
+                }
+                
 
                 // split settings value into an array for which columns have lookups
                 
@@ -299,7 +340,7 @@
                         if (!excludeColIdxArr.includes(c.index)){
                             var colwidth = (c.fieldName.length / 2) + 2.5;
                         colWArr.push(colwidth);
-                        $("#dataTableHeaderRow").append("<th id='th_" + c.fieldName + "' style='min-width:" + (colwidth-2) + "em'>" + c.fieldName + "</th>");
+                        $("#dataTableHeaderRow").append("<th id='th_" + c.fieldName + "' style='min-width:" + (colwidth-2) + "em;'>" + c.fieldName + "</th>");
                         }
                     });
 
@@ -387,14 +428,23 @@
                         }
                     });
                     // then get the list of values for that list
+                    // also check if there is a parent lookup, if so, get the name and values that correspond
                     var colSelArr = [];
+                    var parentLkpName = "";
+                    var parentLkpValArr = [];
                     if (colLkpListName != "") {
                         lkpArr.forEach(function (a) {
                             if (a[0] == colLkpListName) {
                                 colSelArr = a[1];
+                                // checking for parent
+                                if (a.length == 4) {
+                                    parentLkpName = a[2];
+                                    parentLkpValArr = a[3];
+                                }
                             }
                         });
                     }
+
 
                     // get the length of the longest string in the lookup array and adjust the colW to that
                     var longestLkpItem = colSelArr.reduce((a, b) => a.length > b.length ? a : b);
@@ -421,22 +471,38 @@
                     $("[id^='sel_'][id$='_" + j.toString() + "']").css("width", (colW + 1) + "em");
 
 
-                    $("[id='" + tdId + "']").append("<select id='sel_" + tdId + "' style='width:" + (colW + 1) + "em' class='form-select form-select-sm'></select>");
+                    $("[id='" + tdId + "']").append("<select id='sel_" + tdId + "' style='width:" + (colW + 1) + "em;' class='form-select form-select-sm' data-lookupname='" + colLkpListName + "'></select>");
+                    // add an extra attribute data-lookupParentName if there is a parent defined
+                    if (parentLkpName != "") {
+                        $("[id='sel_" + tdId + "']").attr("data-lookupparentname",parentLkpName);
+                    }
                     // if it's a new row then need to add a blank value to the select that will be removed after the user has selected a value
                     if (isNewRow || cellValue == "") {
                         $("[id='sel_" + tdId + "']").append("<option id='blkopt_" + tdId + "' value='' selected></option>");
                         $("[id='sel_" + tdId + "']").on("change", function() {
-                            $("[id='blkopt_" + tdId + "']").remove();
+                            $("[id='blkopt_" + tdId + "']").hide();
                         });
                         foundExistingVal = true;
                     }
                     
-                    colSelArr.sort().forEach(function(lv) {
+                    colSelArr.sort().forEach(function(lv,w) {
                         if (lv == selectedVal) {
-                            $("[id='sel_" + tdId + "']").append("<option value='" + lv.replace(/'/g, "&#39;") + "' selected>" + lv + "</option>");
+                            // if parent defined then add the attribute data-lookupParentValue
+                            if (parentLkpName != "" && parentLkpValArr.length > w) {
+                                $("[id='sel_" + tdId + "']").append("<option value='" + lv.replace(/'/g, "&#39;") + "' data-lookupparentvalue='" + parentLkpValArr[w].replace(/'/g, "&#39;") + "' selected>" + lv + "</option>");
+                            } else {
+                                $("[id='sel_" + tdId + "']").append("<option value='" + lv.replace(/'/g, "&#39;") + "' selected>" + lv + "</option>");
+                            }
+                            
                             foundExistingVal = true;
                         } else {
-                            $("[id='sel_" + tdId + "']").append("<option value='" + lv.replace(/'/g, "&#39;") + "'>" + lv + "</option>");
+                            // if parent defined then add the attribute data-lookupParentValue
+                            if (parentLkpName != "" && parentLkpValArr.length > w) {
+                                $("[id='sel_" + tdId + "']").append("<option value='" + lv.replace(/'/g, "&#39;") + "' data-lookupparentvalue='" + parentLkpValArr[w].replace(/'/g, "&#39;") + "'>" + lv + "</option>");
+                            } else {
+                                $("[id='sel_" + tdId + "']").append("<option value='" + lv.replace(/'/g, "&#39;") + "'>" + lv + "</option>");
+                            }
+                            
                         }
                     });
 
@@ -444,12 +510,43 @@
                     if (!foundExistingVal && cellValue != "") {
                         $("[id='sel_" + tdId + "']").append("<option value='" + selectedVal.replace(/'/g, "&#39;") + "' selected>" + selectedVal + "</option>");
                     }
+
+                    // if it has a parent lookup, then first check to see if the parent has a value
+                    if (parentLkpName != "") {
+                        var $currSel = $("[id='sel_" + tdId + "']");
+                        var $parentSel = $("[id^=sel_td_" + i.toString() + "_][data-lookupname='" + parentLkpName + "']");
+                        var currParentVal = $parentSel.val();
+                        //$currSel.closest("[data-lookupname='" + parentLkpName + "']").val();
+                        // if the value is defined and not blank
+                        if (currParentVal != undefined && currParentVal != "") {
+                            // first show all the options
+                            $currSel.children().show();
+                            // then hide the unnecessary ones by a filter the list to the currently unselected options which don't match the parent selected value
+                            $currSel.children("[data-lookupparentvalue!='" + currParentVal + "']").filter(":not(:selected)").hide();
+                        } else {
+                            // if no current value in the parent then hide all options excpet the blank one until they choose a parent value
+                            $currSel.children().filter(":not(:selected)").hide();
+                        }
+
+                        // then add an on change event to the parent 
+                        $parentSel.on("change",function() {
+                            var newParentVal = $(this).val();
+                            if (newParentVal != undefined && newParentVal != "") {
+                                // first show all the options
+                                $currSel.children().show();
+                                // make sure the blank value is selected
+                                $currSel.val("");
+                                // then hide the unnecessary ones by a filter the list to the currently unselected options which don't match the parent selected value
+                                $currSel.children("[data-lookupparentvalue!='" + newParentVal + "']").filter(":not(:selected)").hide();
+                            }
+                        });
+                    }
                 } else
                 // datatype = string
                 if (colDataType == "string") {
                     //<input type="text" value="testing" class="form-control">
                     
-                    $("[id='" + tdId + "']").append("<input type='text' style='width:" + colW + "em' class='form-control form-control-sm' value='" + dc.value + "'>");
+                    $("[id='" + tdId + "']").append("<input type='text' style='width:" + colW + "em;' class='form-control form-control-sm' value='" + dc.value + "'>");
                     // and hide it if it's the username column
                     if (mainCols[j].fieldName == usernameCol) {
                         $("[id='" + tdId + "']").hide();
@@ -457,7 +554,7 @@
                 } else 
                 // datatype = integer || int
                 if (colDataType == "integer" || colDataType == "int") {
-                    $("[id='" + tdId + "']").append("<input type='number' style='width:" + colW + "em' class='form-control form-control-sm' value='" + dc.value + "'>");
+                    $("[id='" + tdId + "']").append("<input type='number' style='width:" + colW + "em;' class='form-control form-control-sm' value='" + dc.value + "'>");
                     $("[id='" + tdId + "']").children().on("input", function() {
                         if ($(this).val() != "") {
                             $(this).val(Math.round($(this).val()));
@@ -467,12 +564,12 @@
                 else 
                 // datatype = float
                 if (colDataType == "float") {
-                    $("[id='" + tdId + "']").append("<input type='number' style='width:" + colW + "em' class='form-control form-control-sm' value='" + dc.value + "'>");
+                    $("[id='" + tdId + "']").append("<input type='number' style='width:" + colW + "em;' class='form-control form-control-sm' value='" + dc.value + "'>");
                 }
                 else
                 // datype = date
                 if (colDataType == "date") {
-                    $("[id='" + tdId + "']").append("<input type='text' style='width:7em' class='form-control form-control-sm' value='" + dc.value + "'>");
+                    $("[id='" + tdId + "']").append("<input type='text' style='width:7em;' class='form-control form-control-sm' value='" + dc.value + "'>");
                     var dtOptions = {
                         format: 'yyyy-mm-dd',
                         todayHighlight: true,
