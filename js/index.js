@@ -147,8 +147,8 @@
                 // $("#buttonRow").addClass("me-3");
 
                 $("#mainContainer").removeClass("mx-auto");
-                $("#mainContainer").removeClass("ms-3");
-                $("#mainContainer").addClass("me-3");
+                $("#mainContainer").removeClass("ms-0");
+                $("#mainContainer").addClass("me-0");
 
                 $("#buttonRow").addClass("justify-content-end");
                 $("#buttonRow").removeClass("justify-content-start");
@@ -165,8 +165,8 @@
                 // $("#buttonRow").removeClass("me-3");
                 // $("#buttonRow").addClass("mx-auto");
 
-                $("#mainContainer").removeClass("me-3");
-                $("#mainContainer").removeClass("ms-3");
+                $("#mainContainer").removeClass("me-0");
+                $("#mainContainer").removeClass("ms-0");
                 $("#mainContainer").addClass("mx-auto");
 
                 $("#buttonRow").addClass("justify-content-center");
@@ -184,9 +184,9 @@
                 // $("#buttonRow").removeClass("mx-auto");
                 // $("#buttonRow").addClass("ms-3")
 
-                $("#mainContainer").removeClass("me-3");
+                $("#mainContainer").removeClass("me-0");
                 $("#mainContainer").removeClass("mx-auto");
-                $("#mainContainer").addClass("ms-3");
+                $("#mainContainer").addClass("ms-0");
 
                 $("#buttonRow").addClass("justify-content-start");
                 $("#buttonRow").removeClass("justify-content-center");
