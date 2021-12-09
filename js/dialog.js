@@ -344,6 +344,8 @@
         tableau.extensions.settings.set("childParam", $("#childParam").val());
         tableau.extensions.settings.set("parentParam", $("#parentParam").val());
         tableau.extensions.settings.set("tableAlign", $("#tableAlign").val());
+
+
         if ($("#childParam").val() != "") {
             tableau.extensions.settings.set("childParam", $("#childParam").val());
         }

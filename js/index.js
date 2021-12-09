@@ -1,7 +1,5 @@
 'use strict';
 
-//const { ajaxPrefilter } = require("jquery");
-
 (function() {
 
     // vars to hold ref to the unregister event listener functions
@@ -139,6 +137,7 @@
             $("#btn_newRow").show();
         }
 
+
         // set table alignment if defined (left align by default)
         if (tableAlign != undefined){
             if (tableAlign == "right"){
@@ -201,6 +200,8 @@
                 $("#dataTable").css("margin-right","auto");
             }
         }
+
+        
 
                
 
