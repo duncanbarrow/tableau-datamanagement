@@ -387,7 +387,7 @@
                     // if there are filters probably need to take them into account too
                     var windowH = $(document).height();
 
-                    $("#tableContainer").css("height",(windowH - 150));
+                    $("#tableContainer").css("height",(windowH - 175));
 
 
                     
