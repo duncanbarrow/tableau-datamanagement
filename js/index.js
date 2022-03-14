@@ -382,6 +382,14 @@
                         })
                     }
 
+                    // get the height of the visibile window and fix the viewed part of the table
+                    // - 75 for the buttons
+                    // if there are filters probably need to take them into account too
+                    var windowH = $(document).height();
+
+                    $("#tableContainer").css("height",(windowH - 75));
+
+
                     
                     // clear table and create header row
                     $("#dataTable").text("");
