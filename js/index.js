@@ -474,12 +474,12 @@
 
                     // get the height of the visibile window and fix the viewed part of the table
                     // - 100 for the buttons
-                    // - 100 if there are filters
+                    // - 175 if there are also filters
                     // if there are filters probably need to take them into account too
                     var windowH = $(document).height();
                     var heightAdj = -100;
                     if (filterColIdxArr.length > 0){
-                        heightAdj = -200;
+                        heightAdj = -175;
                     }
 
                     $("#tableContainer").css("height",(windowH + heightAdj));
