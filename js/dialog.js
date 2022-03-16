@@ -198,10 +198,11 @@
     function lookupListUpdate(lookupWorksheet,mainWorksheet,usernameColumn,isChange) {
         // try to get previously defined list of lookups, a 2-dimensional array ||columnName|LkpListName||
         var lookupCols = tableau.extensions.settings.get("lookupCols");
-        // try to get previously defined list of read only and not null columns and exclude columns
+        // try to get previously defined list of read only and not null columns and exclude columns and filter columns
         var readOnlyCols = tableau.extensions.settings.get("readOnlyCols");
         var notNullCols = tableau.extensions.settings.get("notNullCols");
         var excludeCols = tableau.extensions.settings.get("excludeCols");
+        var filterCols = tableau.extensions.settings.get("filterCols");
 
         // get dashboard and worksheet
         var dashboard = tableau.extensions.dashboardContent.dashboard;
@@ -249,6 +250,7 @@
                         $("[id='tr_col_" + current_value.fieldName + "']").append("<td style='text-align: center;'><input type='checkbox' id='ro_" + current_value.fieldName + "' class='form-check-input'></td>");
                         $("[id='tr_col_" + current_value.fieldName + "']").append("<td style='text-align: center;'><input type='checkbox' id='nn_" + current_value.fieldName + "' class='form-check-input'></td>");
                         $("[id='tr_col_" + current_value.fieldName + "']").append("<td style='text-align: center;'><input type='checkbox' id='ex_" + current_value.fieldName + "' class='form-check-input'></td>");
+                        $("[id='tr_col_" + current_value.fieldName + "']").append("<td style='text-align: center;'><input type='checkbox' id='fl_" + current_value.fieldName + "' class='form-check-input'></td>");
                         $("[id='tr_col_" + current_value.fieldName + "']").append("<td style='text-align: center;'><input type='checkbox' id='chk_" + current_value.fieldName + "' class='form-check-input'></td>");
                         $("[id='tr_col_" + current_value.fieldName + "']").append("<td><select id='sel_" + current_value.fieldName + "' class='form-select' disabled></td>");
                         // loop over each lookup list and add as an option
@@ -298,7 +300,18 @@
                     // loop over each column and mark as checked
                     excludeColArray.forEach(function (ex) {
                         $("[id='ex_" + ex + "']").prop("checked",true);
-                    })
+                    });
+                }
+
+                // try setting filter cols if they have been defined
+                if (filterCols != undefined && !isChange) {
+                    // split into array
+                    var filterColArray = filterCols.split("|");
+
+                    // loop over each column and mark as checked
+                    filterColArray.forEach(function (fl) {
+                        $("[id='fl_" + fl + "']").prop("checked",true);
+                    });
                 }
     
     
@@ -368,7 +381,7 @@
         // Read Only Cols
         var roCols = [];
         $("[id^=ro_").filter(":checked").each(function() {
-            var roCol = $(this).attr('id').substr(3);
+            var roCol = $(this).attr('id').substring(3);
             roCols.push(roCol);
         })
         tableau.extensions.settings.set("readOnlyCols", roCols.join("|"));
@@ -376,7 +389,7 @@
         // NOT NULL Cols
         var nnCols = [];
         $("[id^=nn_").filter(":checked").each(function() {
-            var nnCol = $(this).attr("id").substr(3);
+            var nnCol = $(this).attr("id").substring(3);
             nnCols.push(nnCol);
         });
         tableau.extensions.settings.set("notNullCols", nnCols.join("|"));
@@ -384,16 +397,23 @@
         // Exclude cols
         var exCols = [];
         $("[id^=ex_").filter(":checked").each(function() {
-            var exCol = $(this).attr("id").substr(3);
+            var exCol = $(this).attr("id").substring(3);
             exCols.push(exCol);
-        })
+        });
         tableau.extensions.settings.set("excludeCols", exCols.join("|"));
 
+        // Filter Cols
+        var flCols = [];
+        $("[id^=fl_").filter(":checked").each(function() {
+            var flCol = $(this).attr("id").substring(3);
+            flCols.push(flCol);
+        });
+        tableau.extensions.settings.set("filterCols", flCols.join("|"));
 
         // lookup Cols
         var lkpCols = [];
         $("[id^=chk_]").filter(":checked").each(function() {
-            var colWithLkp = $(this).attr('id').substr(4);
+            var colWithLkp = $(this).attr('id').substring(4);
             var lkpRefId = "[id='sel_" + colWithLkp + "']";
             var lkpRefVal = $(lkpRefId).val();
 

@@ -27,6 +27,8 @@
     var notNullColIdxArr = [];
     var excludeCols;
     var excludeColIdxArr = [];
+    var filterCols;
+    var filterColIdxArr = [];
     var childParam;
     var parentParam;
 
@@ -93,6 +95,8 @@
         uniqueColIdxArr = [];
         excludeCols;
         excludeColIdxArr = [];
+        filterCols;
+        filterColIdxArr = [];
 
         // unregister event listeners for old worksheet, if exists
         if (unregisterFilterEventListener != null) {
@@ -126,6 +130,7 @@
         readOnlyCols = tableau.extensions.settings.get("readOnlyCols");
         notNullCols = tableau.extensions.settings.get("notNullCols");
         excludeCols = tableau.extensions.settings.get("excludeCols");
+        filterCols = tableau.extensions.settings.get("filterCols");
         var tableAlign = tableau.extensions.settings.get("tableAlign");
         childParam = tableau.extensions.settings.get("childParam");
         parentParam = tableau.extensions.settings.get("parentParam");
@@ -141,10 +146,6 @@
         // set table alignment if defined (left align by default)
         if (tableAlign != undefined){
             if (tableAlign == "right"){
-                // $("#buttonRow").removeClass("mx-auto");
-                // $("#buttonRow").removeClass("ms-3");
-                // $("#buttonRow").addClass("me-3");
-
                 $("#mainContainer").removeClass("mx-auto");
                 $("#mainContainer").removeClass("ms-0");
                 $("#mainContainer").addClass("me-0");
@@ -152,18 +153,14 @@
                 $("#buttonRow").addClass("justify-content-end");
                 $("#buttonRow").removeClass("justify-content-start");
                 $("#buttonRow").removeClass("justify-content-center");
-                
-                // $("#tableContainer").removeClass("mx-auto");
-                // $("#tableContainer").removeClass("ms-3");
-                // $("#tableContainer").addClass("me-3");
+
+                $("#filterRow").addClass("justify-content-end");
+                $("#filterRow").removeClass("justify-content-start");
+                $("#filterRow").removeClass("justify-content-center");
 
                 $("#dataTable").css("margin-left","auto");
                 $("#dataTable").css("margin-right",0);
             } else if (tableAlign == "center") {
-                // $("#buttonRow").removeClass("ms-3");
-                // $("#buttonRow").removeClass("me-3");
-                // $("#buttonRow").addClass("mx-auto");
-
                 $("#mainContainer").removeClass("me-0");
                 $("#mainContainer").removeClass("ms-0");
                 $("#mainContainer").addClass("mx-auto");
@@ -172,17 +169,13 @@
                 $("#buttonRow").removeClass("justify-content-start");
                 $("#buttonRow").removeClass("justify-content-end");
 
-                // $("#tableContainer").removeClass("ms-3");
-                // $("#tableContainer").removeClass("me-3");
-                // $("#tableContainer").addClass("mx-auto");
+                $("#filterRow").addClass("justify-content-center");
+                $("#filterRow").removeClass("justify-content-start");
+                $("#filterRow").removeClass("justify-content-end");
 
                 $("#dataTable").css("margin-left","auto");
                 $("#dataTable").css("margin-right","auto");
             } else {
-                // $("#buttonRow").removeClass("me-3");
-                // $("#buttonRow").removeClass("mx-auto");
-                // $("#buttonRow").addClass("ms-3")
-
                 $("#mainContainer").removeClass("me-0");
                 $("#mainContainer").removeClass("mx-auto");
                 $("#mainContainer").addClass("ms-0");
@@ -191,10 +184,9 @@
                 $("#buttonRow").removeClass("justify-content-center");
                 $("#buttonRow").removeClass("justify-content-end");
 
-
-                // $("#tableContainer").removeClass("me-3");
-                // $("#tableContainer").removeClass("mx-auto");
-                // $("#tableContainer").addClass("ms-3")
+                $("#filterRow").addClass("justify-content-start");
+                $("#filterRow").removeClass("justify-content-center");
+                $("#filterRow").removeClass("justify-content-end");
 
                 $("#dataTable").css("margin-left",0);
                 $("#dataTable").css("margin-right","auto");
@@ -379,15 +371,118 @@
                         excludeColArr.forEach(function (ex) {
                             var exColIdx = mainCols.find(column => column.fieldName === ex).index;
                             excludeColIdxArr.push(exColIdx);
-                        })
+                        });
                     }
+
+                    // if there are any filter columns defined get them into an array
+                    filterColIdxArr = [];
+                    var filterColArr = [];
+                    if (filterCols != undefined && filterCols != ""){
+                        filterColArr = filterCols.split("|");
+                    }
+                    // then get the indexes of those columns
+                    if (filterColArr.length > 0){
+                        filterColArr.forEach(function (fl) {
+                            var flColIdx = mainCols.find(column => column.fieldName === fl).index;
+                            filterColIdxArr.push(flColIdx);
+                        });
+                    }
+
+                    // add filters
+                    $("#filterRow").text("");
+                    $("#filterRow").append("<div class='col-auto'>&nbsp;</div>");
+                    filterColArr.forEach(function (fl, i) {
+                        var fltSpace = "me-2";
+                        if (filterColArr.length == (i+1)) {
+                            fltSpace = "me-0";
+                        }
+
+                        $("#filterRow").append("<div class='col-auto'><div class='dropdown'><button class='btn btn-outline-secondary dropdown-toggle checkbox-menu-all " + fltSpace + "' type='button' id='btn_fl_" + fl + "' data-bs-toggle='dropdown' data-bs-auto-close='outside' aria-haspopup='true' aria-expanded='true'>" + fl + "<span class='caret'></span></button><ul class='dropdown-menu checkbox-menu allow-focus' id='ul_fl_" + fl + "' aria-labelledby='btn_fl_" + fl + "'></ul></div></div>");
+
+                        var flColIdx = filterColIdxArr[i];
+
+                        var distFilterArr = [...new Set(sumdata.data.map(row => row[flColIdx].value))];
+                        distFilterArr.sort();
+
+                        distFilterArr.forEach(function(v) {
+                            $("[id='ul_fl_" + fl + "']").append("<li><label class='dropdown-item'><input type='checkbox' checked>" + v + "</label></li>");
+                        });
+
+                        // add event listener for when it closes to filter the data as necessary
+                        var filterDropdown = $("[id='btn_fl_" + fl + "']");
+                        filterDropdown.on("hide.bs.dropdown", function() {
+                            // get filter values checked and unchecked
+                            var chkArr = [];
+                            $(this).siblings("ul").find("input[type='checkbox']:not(.checkbox-menu-all-check):checked").parent('label').each(function () {
+                                chkArr.push($(this).text());
+                            });
+                            var unchkArr = [];
+                            $(this).siblings("ul").find("input[type='checkbox']:not(.checkbox-menu-all-check):not(:checked)").parent('label').each(function() {
+                                unchkArr.push($(this).text());
+                            });
+                            
+                            // set attr data-idm-filter to ethier 0 or 1 on the td element
+                            chkArr.forEach(function (c) {
+                                $("#dataTable").find("td[id$='_" + flColIdx + "']").children('[value="' + c + '"]').parent("td").attr("data-idm-filter","0");
+                                $("#dataTable").find("td[id$='_" + flColIdx + "']").find('[value="' + c + '"]:selected').closest("td").attr("data-idm-filter","0");
+                            });
+                            unchkArr.forEach(function(u) {
+                                $("#dataTable").find("td[id$='_" + flColIdx + "']").children('[value="' + u + '"]').parent("td").attr("data-idm-filter","1");
+                                $("#dataTable").find("td[id$='_" + flColIdx + "']").find('[value="' + u + '"]:selected').closest("td").attr("data-idm-filter","1");
+                            });
+
+                            // then hide any row where there is at least 1 td with the attr data-idm-filter = 1
+                            $("#dataTable").find("tr").each(function() {
+                                if ($(this).find("td[data-idm-filter='1']").length > 0) {
+                                    $(this).hide();
+                                } else {
+                                    $(this).show();
+                                }
+                            });
+                        });
+
+                    });
+                    $("#filterRow").append("<div class='col-auto'>&nbsp;</div>");
+
+                    // add functionality for "(All)" checkbox in filters
+                    $(".checkbox-menu-all").on('click', function() {
+                        var firstLabel = $(this).next("ul").children().first().children("label").text();
+                        if (firstLabel != "(All)"){
+                            $(this).next("ul").prepend("<li><label><input type='checkbox' class='checkbox-menu-all-check' checked>(All)</label></li>");
+                        }
+                    
+                        $(this).next("ul").find("input[type='checkbox']:not(.checkbox-menu-all-check)").addClass("checkbox-menu-check");
+                    
+                        $(".checkbox-menu-all-check").on("change", function() {
+                            var isAll = this.checked;
+                            $(this).closest("ul").find("input[type='checkbox']").prop("checked",isAll);
+                        });
+                    
+                        $(".checkbox-menu-check").on("change", function() {
+                            // count all checkboxes in the list
+                            var chkCount = ($(this).closest("ul").find("input[type='checkbox']").length - 1);
+                            // count all that are checked
+                            var chkCountChecked = $(this).closest("ul").find("input[type='checkbox']:not(.checkbox-menu-all-check):checked").length;
+                            if (chkCount == chkCountChecked) {
+                                $(this).closest("ul").find(".checkbox-menu-all-check").prop("checked",true);
+                            } else {
+                                $(this).closest("ul").find(".checkbox-menu-all-check").prop("checked",false);
+                            }
+                        });
+                     });
+
 
                     // get the height of the visibile window and fix the viewed part of the table
                     // - 100 for the buttons
+                    // - 100 if there are filters
                     // if there are filters probably need to take them into account too
                     var windowH = $(document).height();
+                    var heightAdj = -100;
+                    if (filterColIdxArr.length > 0){
+                        heightAdj = -200;
+                    }
 
-                    $("#tableContainer").css("height",(windowH - 100));
+                    $("#tableContainer").css("height",(windowH + heightAdj));
 
 
                     
@@ -672,6 +767,7 @@
             $("[id='" + trId + "']").append("<td id='" + trDelId + "'><button style='width:2.5em' class='btn btn-danger btn-sm' id='" + trDelBtnId + "'>×</button></td>");
             // if it's a new row the delete button removes the row entirely from the table so it never even gets submitted
             if (isNewRow) {
+                $("[id='" + trDelId + "']").addClass("table-primary");
                 $("[id='" + trDelBtnId + "']").on("click", function() {
                     var $dRow = $(this).parent().parent();
                     $dRow.remove();
