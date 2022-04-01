@@ -624,7 +624,7 @@
                     $("[id^='sel_'][id$='_" + j.toString() + "']").css("width", (colW + 1) + "em");
 
 
-                    $("[id='" + tdId + "']").append("<select id='sel_" + tdId + "' style='width:" + (colW + 1) + "em;' class='form-select form-select-sm' data-lookupname='" + colLkpListName + "'></select>");
+                    $("[id='" + tdId + "']").append("<select id='sel_" + tdId + "' style='width:" + (colW + 1) + "em; font-size:75%;' class='form-select form-select-sm' data-lookupname='" + colLkpListName + "'></select>");
                     // add an extra attribute data-lookupParentName if there is a parent defined
                     if (parentLkpName != "") {
                         $("[id='sel_" + tdId + "']").attr("data-lookupparentname",parentLkpName);
@@ -699,7 +699,7 @@
                 if (colDataType == "string") {
                     //<input type="text" value="testing" class="form-control">
                     
-                    $("[id='" + tdId + "']").append("<input type='text' style='width:" + colW + "em;' class='form-control form-control-sm' value='" + dc.value + "'>");
+                    $("[id='" + tdId + "']").append("<input type='text' style='width:" + colW + "em; font-size:75%;' class='form-control form-control-sm' value='" + dc.value + "'>");
                     // and hide it if it's the username column
                     if (mainCols[j].fieldName == usernameCol) {
                         $("[id='" + tdId + "']").hide();
@@ -707,7 +707,7 @@
                 } else 
                 // datatype = integer || int
                 if (colDataType == "integer" || colDataType == "int") {
-                    $("[id='" + tdId + "']").append("<input type='number' style='width:" + colW + "em;' class='form-control form-control-sm' value='" + dc.value + "'>");
+                    $("[id='" + tdId + "']").append("<input type='number' style='width:" + colW + "em; font-size:75%;' class='form-control form-control-sm' value='" + dc.value + "'>");
                     $("[id='" + tdId + "']").children().on("input", function() {
                         if ($(this).val() != "") {
                             $(this).val(Math.round($(this).val()));
@@ -717,12 +717,12 @@
                 else 
                 // datatype = float
                 if (colDataType == "float") {
-                    $("[id='" + tdId + "']").append("<input type='number' style='width:" + colW + "em;' class='form-control form-control-sm' value='" + dc.value + "'>");
+                    $("[id='" + tdId + "']").append("<input type='number' style='width:" + colW + "em; font-size:75%;' class='form-control form-control-sm' value='" + dc.value + "'>");
                 }
                 else
                 // datype = date
                 if (colDataType == "date") {
-                    $("[id='" + tdId + "']").append("<input type='text' style='width:7em;' class='form-control form-control-sm' value='" + dc.value + "'>");
+                    $("[id='" + tdId + "']").append("<input type='text' style='width:7em; font-size:75%;' class='form-control form-control-sm' value='" + dc.value + "'>");
                     var dtOptions = {
                         format: 'yyyy-mm-dd',
                         todayHighlight: true,
