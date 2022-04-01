@@ -493,7 +493,7 @@
                         if (!excludeColIdxArr.includes(c.index)){
                             var colwidth = (c.fieldName.length / 2) + 2.5;
                         colWArr.push(colwidth);
-                        $("#dataTableHeaderRow").append("<th id='th_" + c.fieldName + "' style='min-width:" + (colwidth-2) + "em;'>" + c.fieldName + "</th>");
+                        $("#dataTableHeaderRow").append("<th id='th_" + c.fieldName + "' style='min-width:" + (colwidth-2) + "em; font-size:85%;'>" + c.fieldName + "</th>");
                         }
                     });
 
