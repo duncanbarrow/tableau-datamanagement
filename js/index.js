@@ -796,6 +796,10 @@
         $("tr").children().children().removeClass("border");
         $("tr").children().children().removeClass("border-danger");
 
+        // clear any red background from validation errors if exists
+        $("tr").children().children().removeClass("bg-danger");
+        $("tr").children().children().removeClass("text-white");
+
         // first check all cells with the attribute data-notnull = true have a value
         var notnullCount = 0;
         $("[data-notnull=true]").find("input, select").each(function() {
@@ -909,8 +913,8 @@
                     var errTdId = rId.replace("tr","td") + "_" + colIdx;
 
                     // highlight the cell
-                    $("#" + errTdId).children().addClass("border");
-                    $("#" + errTdId).children().addClass("border-danger");
+                    $("#" + errTdId).children().addClass("bg-danger");
+                    $("#" + errTdId).children().addClass("text-white");
 
                 });
             } else if (jsonData.code == "500") {
