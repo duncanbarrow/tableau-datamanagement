@@ -26,7 +26,7 @@ function doPost(e) {
   var data = cont.tblrows.filter(row => row.__isDeleted == false);
 
 
-  // first check permissions
+  // check permissions
   
   var hasPermission = securityCheck(username);
 
@@ -47,7 +47,19 @@ function doPost(e) {
 
       // user has permissions and there are no duplicates
 
-      // first delete any rows as necessary
+      // add any other validation as necessary
+      var valRows = findValidationErrors(data, uniqueColumns);
+      if (valRows.length > 0) {
+        // validation errors found
+        var hasValErrs = {};
+        hasValErrs.code = 422;
+        hasValErrs.title = "Error message to be displayed";
+        hasValErrs.message = valRows;
+
+        return ContentService.createTextOutput(JSON.stringify(hasValErrs));
+      }
+
+      // delete any rows as necessary
       var rowsDeleted = deleteRows(data_deleted, uniqueColumns);
 
       // then merge the rest of the data
@@ -79,7 +91,6 @@ function doPost(e) {
     noPerm.code = 401;
     noPerm.message = username + " does not have permission to edit this data";
 
-    //return ContentService.createTextOutput(JSON.stringify(e)).setMimeType(ContentService.MimeType.JSON);
     return ContentService.createTextOutput(JSON.stringify(noPerm));
   }
 }
@@ -221,7 +232,7 @@ function mergeRows(data, uniqueColumns) {
       var rowPKArr = [];
       uniqueColumns.forEach(function(pk) {
         var pkIdx = colMap[pk];
-        rowPKArr.push(row[pkIdx].toUpperCase());
+        rowPKArr.push(row[pkIdx].toString().toUpperCase());
       });
       var rowPK = rowPKArr.join("|");
 
@@ -234,7 +245,7 @@ function mergeRows(data, uniqueColumns) {
       // get the PK of that row as a string concat with |
       var pkArr = [];
       uniqueColumns.forEach(function(pk) {
-        pkArr.push(dataRow[pk].toUpperCase());
+        pkArr.push(dataRow[pk].toString().toUpperCase());
       });
       var dataRowPK = pkArr.join("|");
 
@@ -273,6 +284,7 @@ function mergeRows(data, uniqueColumns) {
 
     });
 
+    // COMMENT OUT THE BELOW IF NOT NEEDED TO DELETE ROWS
     // lastly check for any rows that still exist but weren't pushed in the data
     // these should be deleted as it is probably from when a PK changed
     // so the old one doesn't exist anymore
@@ -289,6 +301,7 @@ function mergeRows(data, uniqueColumns) {
         mainSheet.deleteRow(rowIdx + 2);
       });
     }
+    // COMMENT OUT THE ABOVE IF NOT NEEDED TO DELETE ROWS
 
     return "success";
   }
@@ -298,3 +311,11 @@ function mergeRows(data, uniqueColumns) {
 
 }
 
+function findValidationErrors(data, uniqueColumns) {
+  // add any additional checks on the data as necessary and return a 2D array specifying the following:
+  // [[__rowId, "Error Column Name"],..]
+  // note that __rowId exists on each row in the variable "data"
+
+  var tmp = [];
+  return tmp;
+}

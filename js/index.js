@@ -891,7 +891,28 @@
                 jsonData.message.forEach(function(dup) {
                     $("#" + dup).children().children().addClass("border");
                     $("#" + dup).children().children().addClass("border-danger");
-                })
+                });
+            } else if (jsonData.code == "422") {
+                // data validation error
+                alert(jsonData.title);
+                // add a red border around the cells that have validation errors
+                jsonData.message.forEach(function(val) {
+                    // get the rowId
+                    var rId = val[0];
+                    // get the column name with the error
+                    var col = val[1];
+
+                    // get the index of that columm
+                    var colIdx = mainCols.find(column => column.fieldName == col).index;
+
+                    // construct the id of the td element
+                    var errTdId = rId.replace("tr","td") + "_" + colIdx;
+
+                    // highlight the cell
+                    $("#" + errTdId).children().addClass("border");
+                    $("#" + errTdId).children().addClass("border-danger");
+
+                });
             } else if (jsonData.code == "500") {
                 //error on deletion or merge
                 alert("Error\nDelete: " + jsonData.delete_message + "\nMerge: " + jsonData.merge_message);
