@@ -397,7 +397,7 @@
                             fltSpace = "me-0";
                         }
 
-                        $("#filterRow").append("<div class='col-auto'><div class='dropdown'><button class='btn btn-outline-secondary dropdown-toggle checkbox-menu-all " + fltSpace + "' type='button' id='btn_fl_" + fl + "' data-bs-toggle='dropdown' data-bs-auto-close='outside' aria-haspopup='true' aria-expanded='true'>" + fl + "<span class='caret'></span></button><ul style='overflow-y: visible;' class='dropdown-menu checkbox-menu allow-focus' id='ul_fl_" + fl + "' aria-labelledby='btn_fl_" + fl + "'></ul></div></div>");
+                        $("#filterRow").append("<div class='col-auto'><div class='dropdown' style='overflow-y: visible;'><button class='btn btn-outline-secondary dropdown-toggle checkbox-menu-all " + fltSpace + "' type='button' id='btn_fl_" + fl + "' data-bs-toggle='dropdown' data-bs-auto-close='outside' aria-haspopup='true' aria-expanded='true'>" + fl + "<span class='caret'></span></button><ul class='dropdown-menu checkbox-menu allow-focus' id='ul_fl_" + fl + "' aria-labelledby='btn_fl_" + fl + "'></ul></div></div>");
 
                         var flColIdx = filterColIdxArr[i];
 
