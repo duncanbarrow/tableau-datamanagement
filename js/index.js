@@ -388,6 +388,19 @@
                         });
                     }
 
+
+                    // get the height of the visibile window and fix the viewed part of the table
+                    // - 100 for the buttons
+                    // - 175 if there are also filters
+                    // if there are filters probably need to take them into account too
+                    var windowH = $(document).height();
+                    var heightAdj = -100;
+                    if (filterColIdxArr.length > 0){
+                        heightAdj = -175;
+                    }
+
+                    $("#tableContainer").css("height",(windowH + heightAdj));
+
                     // add filters
                     $("#filterRow").text("");
                     $("#filterRow").append("<div class='col-auto'>&nbsp;</div>");
@@ -397,7 +410,7 @@
                             fltSpace = "me-0";
                         }
 
-                        $("#filterRow").append("<div class='col-auto'><div class='dropdown' style='overflow-y: visible;'><button class='btn btn-outline-secondary dropdown-toggle checkbox-menu-all " + fltSpace + "' type='button' id='btn_fl_" + fl + "' data-bs-toggle='dropdown' data-bs-auto-close='outside' aria-haspopup='true' aria-expanded='true'>" + fl + "<span class='caret'></span></button><ul class='dropdown-menu checkbox-menu allow-focus' id='ul_fl_" + fl + "' aria-labelledby='btn_fl_" + fl + "'></ul></div></div>");
+                        $("#filterRow").append("<div class='col-auto'><div class='dropdown' style='overflow-y: visible;'><button class='btn btn-outline-secondary dropdown-toggle checkbox-menu-all " + fltSpace + "' type='button' id='btn_fl_" + fl + "' data-bs-toggle='dropdown' data-bs-auto-close='outside' aria-haspopup='true' aria-expanded='true'>" + fl + "<span class='caret'></span></button><ul style='max-height: " + (windowH + heightAdj) + ";overflow-y: auto;' class='dropdown-menu checkbox-menu allow-focus' id='ul_fl_" + fl + "' aria-labelledby='btn_fl_" + fl + "'></ul></div></div>");
 
                         var flColIdx = filterColIdxArr[i];
 
@@ -472,17 +485,7 @@
                      });
 
 
-                    // get the height of the visibile window and fix the viewed part of the table
-                    // - 100 for the buttons
-                    // - 175 if there are also filters
-                    // if there are filters probably need to take them into account too
-                    var windowH = $(document).height();
-                    var heightAdj = -100;
-                    if (filterColIdxArr.length > 0){
-                        heightAdj = -175;
-                    }
-
-                    $("#tableContainer").css("height",(windowH + heightAdj));
+                    
 
 
                     
